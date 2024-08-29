@@ -71,7 +71,7 @@ if uploaded_file:
         
         # Create a canvas with a fixed size
         canvas_result = st_canvas(
-            fill_color=im2_reg_resized, #"rgba(0,0,0,0)"
+            fill_color="rgba(0,0,0,0)",
             stroke_color="red",
             stroke_width=5,
             background_image=im2_reg_resized,
