@@ -58,7 +58,7 @@ if uploaded_file:
         im2_reg = Image.open(uploaded_file).convert("RGB")
         
         # Define the fixed size for the canvas
-        canvas_width, canvas_height = 800, 600
+        canvas_width, canvas_height = 800, 300
         
         # Resize image to fit the canvas size
         im2_reg_resized = im2_reg.resize((canvas_width, canvas_height))
