@@ -37,7 +37,7 @@ if uploaded_file is not None:
         drawing_mode="point",
         point_display_radius=5,  # Increase point size for better visibility
         key="canvas",
-        background_color="#ffffff"  # Ensure a default white background color
+        background_color="rgba(0, 0, 0, 0)"  # Ensure a default white background color
     )
 
     # Process points when available
