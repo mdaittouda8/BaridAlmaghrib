@@ -23,20 +23,21 @@ if uploaded_file is not None:
 
     st.write("Draw points on the canvas to select the region for cropping.")
 
-    # Ensure the canvas is properly set with background image
     # Convert the NumPy array back to a PIL Image for canvas background
     pil_img_for_canvas = Image.fromarray(img_array)
 
     # Create a drawable canvas with the uploaded image as background
     canvas_result = st_canvas(
-        fill_color="rgba(255, 255, 255, 0)",  # Transparent fill
+        fill_color="rgba(0, 0, 0, 0)",  # No fill color
         stroke_width=3,
-        background_image=pil_img_for_canvas,  # Use PIL Image
+        background_image=pil_img_for_canvas,  # Use PIL Image as background
         update_streamlit=True,
         width=pil_img_for_canvas.width,
         height=pil_img_for_canvas.height,
         drawing_mode="point",
+        point_display_radius=5,  # Increase point size for better visibility
         key="canvas",
+        background_color="#ffffff"  # Ensure a default white background color
     )
 
     # Process points when available
