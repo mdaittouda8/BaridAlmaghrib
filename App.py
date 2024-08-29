@@ -10,7 +10,7 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-# Securely access the API key from environment variables
+# access the API key from environment variables
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
 st.title("Image Point Selection, Cropping, and Text Extraction")
