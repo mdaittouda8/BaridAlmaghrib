@@ -74,7 +74,7 @@ if uploaded_file:
             fill_color="rgba(0,0,0,0)",
             stroke_color="red",
             stroke_width=5,
-            #background_image=im2_reg_resized,
+            background_image=im2_reg_resized,
             height=canvas_height,
             width=canvas_width,
             drawing_mode="point",
