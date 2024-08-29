@@ -10,7 +10,7 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-# Securely access the API key from environment variables
+# access the API key from environment variables
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
 st.title("Image Point Selection, Cropping, and Text Extraction")
@@ -23,20 +23,24 @@ def crop_image(image, bbox):
 def extract_text_from_image(image):
     url = "https://ocr-extract-text.p.rapidapi.com/ocr"
     
+    # Save image to a BytesIO object to send as file
     buffered = io.BytesIO()
     image.save(buffered, format="JPEG")
     buffered.seek(0)
     
-    files = {'image': buffered}
+    files = {
+        'image': buffered
+    }
     
     headers = {
         "x-rapidapi-key": API_KEY,
         "x-rapidapi-host": "ocr-extract-text.p.rapidapi.com",
     }
     
+    # Send the image file in a POST request
     response = requests.post(url, files=files, headers=headers)
     response_json = response.json()
-    extracted_text = response_json.get("text", "No text found")
+    extracted_text = response_json.get("text", "No text found")  # Adjust based on actual JSON structure
     return extracted_text
 
 # Function to clean up text by removing specified words
@@ -50,24 +54,27 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png"])
 
 if uploaded_file:
     try:
-        # Open the image and ensure it is in RGB format
+        # Open and convert the image to RGB format to avoid compatibility issues
         im2_reg = Image.open(uploaded_file).convert("RGB")
         
-        # Display the uploaded image for verification
-        st.image(im2_reg, caption='Uploaded Image', use_column_width=True)
-        
         # Define the fixed size for the canvas
-        canvas_width, canvas_height = im2_reg.size
+        canvas_width, canvas_height = 800, 600
+        
+        # Resize image to fit the canvas size
+        im2_reg_resized = im2_reg.resize((canvas_width, canvas_height))
+        
+        # Check if the resized image is loading correctly
+        st.write("Debug: Image loaded and resized successfully.")
         
         # Display the image directly in the canvas for point selection
         st.write("Click to select three regions of interest on the image:")
         
-        # Create a canvas with the uploaded image as background
+        # Create a canvas with a fixed size
         canvas_result = st_canvas(
             fill_color="rgba(0,0,0,0)", 
             stroke_color="red",
             stroke_width=5,
-            background_image=im2_reg,  # Use the original uploaded image as the background
+            background_image=im2_reg_resized,
             height=canvas_height,
             width=canvas_width,
             drawing_mode="point",
@@ -75,13 +82,9 @@ if uploaded_file:
             display_toolbar=False,
         )
 
-        # Check if the canvas has received any points
         if canvas_result.json_data is not None:
+            # Get the selected points coordinates
             selected_objects = canvas_result.json_data["objects"]
-            
-            # Debugging statement to show if points are captured
-            st.write(f"Debug: Number of points selected - {len(selected_objects)}")
-            
             if len(selected_objects) == 12:
                 # Extract coordinates of the twelve points (4 per region)
                 points = [(obj["left"], obj["top"]) for obj in selected_objects]
@@ -101,6 +104,22 @@ if uploaded_file:
                 bbox1 = get_bbox(points_region1)
                 bbox2 = get_bbox(points_region2)
                 bbox3 = get_bbox(points_region3)
+                
+                # Convert bounding box coordinates back to original image scale
+                scale_x = im2_reg.width / canvas_width
+                scale_y = im2_reg.height / canvas_height
+                bbox1 = (
+                    int(bbox1[0] * scale_x), int(bbox1[1] * scale_y),
+                    int(bbox1[2] * scale_x), int(bbox1[3] * scale_y)
+                )
+                bbox2 = (
+                    int(bbox2[0] * scale_x), int(bbox2[1] * scale_y),
+                    int(bbox2[2] * scale_x), int(bbox2[3] * scale_y)
+                )
+                bbox3 = (
+                    int(bbox3[0] * scale_x), int(bbox3[1] * scale_y),
+                    int(bbox3[2] * scale_x), int(bbox3[3] * scale_y)
+                )
                 
                 # Crop the image based on the bounding boxes
                 im2_cropped1 = crop_image(im2_reg, bbox1)
