@@ -18,19 +18,23 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     img_array = np.array(image)
 
-    # Display the uploaded image
+    # Display the uploaded image in the sidebar for reference
     st.sidebar.image(image, caption="Uploaded Image", use_column_width=True)
 
     st.write("Draw points on the canvas to select the region for cropping.")
+
+    # Ensure the canvas is properly set with background image
+    # Convert the NumPy array back to a PIL Image for canvas background
+    pil_img_for_canvas = Image.fromarray(img_array)
 
     # Create a drawable canvas with the uploaded image as background
     canvas_result = st_canvas(
         fill_color="rgba(255, 255, 255, 0)",  # Transparent fill
         stroke_width=3,
-        background_image=Image.fromarray(img_array),  # Ensuring it's a PIL Image
+        background_image=pil_img_for_canvas,  # Use PIL Image
         update_streamlit=True,
-        width=image.width,
-        height=image.height,
+        width=pil_img_for_canvas.width,
+        height=pil_img_for_canvas.height,
         drawing_mode="point",
         key="canvas",
     )
