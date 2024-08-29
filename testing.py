@@ -32,12 +32,12 @@ if uploaded_file is not None:
         stroke_width=3,
         background_image=pil_img_for_canvas,  # Use PIL Image as background
         update_streamlit=True,
-        width=pil_img_for_canvas.width,
-        height=pil_img_for_canvas.height,
+        width=pil_img_for_canvas.width/3,
+        height=pil_img_for_canvas.height/3,
         drawing_mode="point",
         point_display_radius=5,  # Increase point size for better visibility
         key="canvas",
-        background_color="rgba(0, 0, 0, 0)"  # Ensure a default white background color
+        #background_color="rgba(0, 0, 0, 0)"  # Ensure a default white background color
     )
 
     # Process points when available
