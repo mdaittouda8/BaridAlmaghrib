@@ -10,10 +10,10 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
-# access the API key from environment variables
+# Access the API key from environment variables
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
-st.title("Image Point Selection, Cropping, and Text Extraction")
+st.title("Image Rectangle Selection, Cropping, and Text Extraction")
 
 # Function to crop the image based on a bounding box
 def crop_image(image, bbox):
@@ -28,9 +28,7 @@ def extract_text_from_image(image):
     image.save(buffered, format="JPEG")
     buffered.seek(0)
     
-    files = {
-        'image': buffered
-    }
+    files = {'image': buffered}
     
     headers = {
         "x-rapidapi-key": API_KEY,
@@ -63,68 +61,48 @@ if uploaded_file:
         # Resize image to fit the canvas size
         im2_reg_resized = im2_reg.resize((canvas_width, canvas_height))
         
-        # Check if the resized image is loading correctly
-        st.write("Debug: Image loaded and resized successfully.")
+        # Display the image directly in the canvas for rectangle selection
+        st.write("Draw three rectangles on the image to select regions of interest:")
         
-        # Display the image directly in the canvas for point selection
-        st.write("Click to select three regions of interest on the image:")
-        
-        # Create a canvas with a fixed size
+        # Create a canvas with drawing mode set to rectangles
         canvas_result = st_canvas(
             fill_color="rgba(0,0,0,0)", 
             stroke_color="red",
-            stroke_width=5,
+            stroke_width=2,
             background_image=im2_reg_resized,
             height=canvas_height,
             width=canvas_width,
-            drawing_mode="point",
+            drawing_mode="rect",  # Set drawing mode to rectangle
             key="canvas",
-            display_toolbar=False,
+            display_toolbar=True,
         )
 
         if canvas_result.json_data is not None:
-            # Get the selected points coordinates
+            # Get the drawn rectangles
             selected_objects = canvas_result.json_data["objects"]
-            if len(selected_objects) == 12:
-                # Extract coordinates of the twelve points (4 per region)
-                points = [(obj["left"], obj["top"]) for obj in selected_objects]
-                
-                # Separate the points into three sets for three regions
-                points_region1 = points[:4]
-                points_region2 = points[4:8]
-                points_region3 = points[8:]
-                
-                # Calculate bounding boxes for all three regions
-                def get_bbox(points):
-                    x_coords, y_coords = zip(*points)
-                    xmin, ymin = max(min(x_coords), 0), max(min(y_coords), 0)
-                    xmax, ymax = min(max(x_coords), canvas_width), min(max(y_coords), canvas_height)
-                    return (xmin, ymin, xmax, ymax)
+            if len(selected_objects) == 3:
+                # Extract bounding boxes for each of the three drawn rectangles
+                bboxes = []
+                for obj in selected_objects:
+                    x, y = int(obj["left"]), int(obj["top"])
+                    w, h = int(obj["width"]), int(obj["height"])
+                    bboxes.append((x, y, x + w, y + h))
 
-                bbox1 = get_bbox(points_region1)
-                bbox2 = get_bbox(points_region2)
-                bbox3 = get_bbox(points_region3)
-                
                 # Convert bounding box coordinates back to original image scale
                 scale_x = im2_reg.width / canvas_width
                 scale_y = im2_reg.height / canvas_height
-                bbox1 = (
-                    int(bbox1[0] * scale_x), int(bbox1[1] * scale_y),
-                    int(bbox1[2] * scale_x), int(bbox1[3] * scale_y)
-                )
-                bbox2 = (
-                    int(bbox2[0] * scale_x), int(bbox2[1] * scale_y),
-                    int(bbox2[2] * scale_x), int(bbox2[3] * scale_y)
-                )
-                bbox3 = (
-                    int(bbox3[0] * scale_x), int(bbox3[1] * scale_y),
-                    int(bbox3[2] * scale_x), int(bbox3[3] * scale_y)
-                )
+                bboxes = [
+                    (
+                        int(bbox[0] * scale_x), int(bbox[1] * scale_y),
+                        int(bbox[2] * scale_x), int(bbox[3] * scale_y)
+                    )
+                    for bbox in bboxes
+                ]
                 
                 # Crop the image based on the bounding boxes
-                im2_cropped1 = crop_image(im2_reg, bbox1)
-                im2_cropped2 = crop_image(im2_reg, bbox2)
-                im2_cropped3 = crop_image(im2_reg, bbox3)
+                im2_cropped1 = crop_image(im2_reg, bboxes[0])
+                im2_cropped2 = crop_image(im2_reg, bboxes[1])
+                im2_cropped3 = crop_image(im2_reg, bboxes[2])
                 
                 # Display the cropped images
                 st.image(im2_cropped1, caption="Cropped Image 1", use_column_width=True)
@@ -151,7 +129,7 @@ if uploaded_file:
                 st.table(df)
                
             else:
-                st.write("Please select exactly twelve points (four for each region).")
+                st.write("Please draw exactly three rectangles.")
     except Exception as e:
         st.error(f"An error occurred while processing the image: {e}")
 else:
