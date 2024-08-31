@@ -55,6 +55,9 @@ if uploaded_file:
         # Open and convert the image to RGB format to avoid compatibility issues
         im2_reg = Image.open(uploaded_file).convert("RGB")
         
+        # Display the uploaded image in the sidebar
+        st.sidebar.image(im2_reg, caption="Uploaded Image", use_column_width=True)
+        
         # Define the fixed size for the canvas
         canvas_width, canvas_height = 800, 600
         
