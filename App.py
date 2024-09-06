@@ -13,7 +13,7 @@ load_dotenv()
 # Access the API key from environment variables
 API_KEY = os.getenv("RAPIDAPI_KEY")
 
-st.title("Image Rectangle Selection, Cropping, and Text Extraction")
+st.title("Barid Al-Maghrib Parcel Form Text Extractor")
 
 # Function to crop the image based on a bounding box
 def crop_image(image, bbox):
@@ -65,7 +65,7 @@ if uploaded_file:
         im2_reg_resized = im2_reg.resize((canvas_width, canvas_height))
         
         # Display the image directly in the canvas for rectangle selection
-        st.write("Draw three rectangles on the image to select regions of interest:")
+        st.write("Draw three rectangles on the image: one over the barcode, one over the expéditeur information, and one over the destinataire information :")
         
         # Create a canvas with drawing mode set to rectangles
         canvas_result = st_canvas(
@@ -119,8 +119,8 @@ if uploaded_file:
                 text3 = extract_text_from_image(im2_cropped3)
                 
                 # Clean up text by removing unwanted words
-                text2_cleaned = clean_text(text2, ["Expéditeur", "المرسل"])
-                text3_cleaned = clean_text(text3, ["Destinataire", "المرسل إليه"])
+                text2_cleaned = clean_text(text2, ["Expéditeur", "المرسل", "الهاتف", "Tél",":", "tel"])
+                text3_cleaned = clean_text(text3, ["Destinataire", "المرسل إليه", "الهاتف", "Tél",":", "tel"])
                 
                 # Display the extracted text in a table
                 data = {
@@ -129,7 +129,8 @@ if uploaded_file:
                     "Destinataire": [text3_cleaned]
                 }
                 df = pd.DataFrame(data, index=["Extracted Text"])
-                st.table(df)
+                st.table(data)
+                
                
             else:
                 st.write("Please draw exactly three rectangles.")
